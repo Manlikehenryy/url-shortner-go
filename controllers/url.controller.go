@@ -2,16 +2,22 @@ package controllers
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-redis/redis/v8"
+	"github.com/manlikehenryy/url-shortener-go/database"
 	"github.com/manlikehenryy/url-shortener-go/helpers"
 	"github.com/manlikehenryy/url-shortener-go/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
+
+var ctx = context.Background()
 
 func CreateUrl(c *gin.Context) {
 	var url models.Url
@@ -30,6 +36,18 @@ func CreateUrl(c *gin.Context) {
 
 	url.UserId = userId
 
+	shortURL := helpers.GenerateShortURL(url.OriginalUrl)
+	expiration := time.Duration(url.Expiration) * time.Second
+
+	// Store the original URL in Redis with expiration
+	err := database.RDB.Set(ctx, shortURL, url.OriginalUrl, expiration).Err()
+	if err != nil {
+		helpers.SendError(c, http.StatusInternalServerError, "Failed to store URL")
+		return
+	}
+
+	url.ShortUrl = shortURL
+
 	insertResult, err := urlCollection.InsertOne(context.Background(), url)
 	if err != nil {
 		log.Println("Database error:", err)
@@ -38,11 +56,51 @@ func CreateUrl(c *gin.Context) {
 	}
 
 	url.ID = insertResult.InsertedID.(primitive.ObjectID)
+	url.ShortUrl = fmt.Sprintf("http://localhost:5000/%s", shortURL)
 
 	helpers.SendJSON(c, http.StatusCreated, gin.H{
 		"data":    url,
 		"message": "Url created successfully",
 	})
+}
+
+
+func RedirectURL(c *gin.Context) {
+	shortURL := c.Param("shortURL")
+
+	// Fetch the original URL from Redis
+	originalURL, err := database.RDB.Get(ctx, shortURL).Result()
+	if err == redis.Nil {
+		helpers.SendError(c, http.StatusNotFound, "URL not found or expired")
+		return
+	} else if err != nil {
+		helpers.SendError(c, http.StatusInternalServerError, "Failed to retrieve URL")
+		return
+	}
+
+	  // Update click count and append user details
+	  url, err := urlCollection.UpdateOne(
+        context.TODO(),
+        bson.M{"shortUrl": shortURL},
+        bson.M{
+            "$inc": bson.M{"clickCount": 1},
+            "$push": bson.M{"clickDetails": bson.M{
+                "ipAddress": c.ClientIP(),
+                "timestamp":  time.Now(),
+            }},
+        },
+    )
+
+	if err != nil {
+		log.Println("Database error:", err)
+	}
+
+	if url.MatchedCount == 0 {
+		log.Println("Url not found")
+	}
+
+	// Redirect to the original URL
+	c.Redirect(http.StatusFound, originalURL)
 }
 
 func GetAllUrl(c *gin.Context) {
@@ -120,7 +178,6 @@ func UpdateUrl(c *gin.Context) {
 		}
 		return
 	}
-	
 
 	if existingUrl.UserId != userId {
 		helpers.SendError(c, http.StatusForbidden, "Unauthorized to update this url")
@@ -129,8 +186,8 @@ func UpdateUrl(c *gin.Context) {
 
 	update := bson.M{
 		"$set": bson.M{
-			"originalUrl":  url.OriginalUrl,
-			"expiration":   url.Expiration,
+			"originalUrl": url.OriginalUrl,
+			"expiration":  url.Expiration,
 		},
 	}
 
@@ -160,7 +217,6 @@ func UsersUrl(c *gin.Context) {
 
 	filter := bson.M{"userId": userId}
 
-	
 	var urls []models.Url
 	params, err := helpers.PaginateCollection(c, urlCollection, filter, &urls)
 	if err != nil {
