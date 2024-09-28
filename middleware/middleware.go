@@ -18,7 +18,8 @@ func RateLimit(c *gin.Context) {
 	ip := helpers.GetClientIP(c)
 
 	limit := 2 // 10 clicks per minute
-	key := fmt.Sprintf("rate_limit:%s", ip)
+	shortURL := c.Param("shortURL")
+	key := fmt.Sprintf("rate_limit:%s%s", ip, shortURL)
 
 	// Increment request count
 	count, err := database.RDB.Incr(ctx, key).Result()
