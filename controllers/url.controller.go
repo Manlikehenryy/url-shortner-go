@@ -43,6 +43,7 @@ func CreateUrl(c *gin.Context) {
 	// Store the original URL in Redis with expiration
 	err := database.RDB.Set(ctx, shortURL, url.OriginalUrl, expiration).Err()
 	if err != nil {
+		log.Println(err)
 		helpers.SendError(c, http.StatusInternalServerError, "Failed to store URL")
 		return
 	}
