@@ -15,8 +15,9 @@ import (
 var ctx = context.Background()
 
 func RateLimit(c *gin.Context) {
-	ip := c.ClientIP()
-	limit := 10 // 10 clicks per minute
+	ip := helpers.GetClientIP(c)
+
+	limit := 2 // 10 clicks per minute
 	key := fmt.Sprintf("rate_limit:%s", ip)
 
 	// Increment request count

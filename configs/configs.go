@@ -20,7 +20,7 @@ type Config struct {
 
 var Env *Config
 
-func Init() {
+func init() {
 
 	Env = &Config{}
 

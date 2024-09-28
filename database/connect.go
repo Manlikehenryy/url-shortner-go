@@ -19,6 +19,7 @@ var RDB *redis.Client
 // Initialize Redis
 
 func init() {
+	
 	RDB = redis.NewClient(&redis.Options{
 		Addr:      configs.Env.REDIS_ADDRESS,  // Redis address (without rediss://)
 		Username:  configs.Env.REDIS_USERNAME, // Username for Redis instance
@@ -47,7 +48,7 @@ func Connect() {
 		log.Fatal(err)
 	}
 
-	DB = Client.Database("go_gin_task_manager")
+	DB = Client.Database("go_url_shortener")
 
 	log.Println("Connected to MongoDB")
 }

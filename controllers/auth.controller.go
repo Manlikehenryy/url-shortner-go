@@ -61,6 +61,8 @@ func Register(c *gin.Context) {
 		LastName:  data["lastName"].(string),
 		Phone:     data["phone"].(string),
 		Email:     strings.TrimSpace(email),
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
 	}
 
 	user.SetPassword(password)
@@ -136,8 +138,7 @@ func Logout(c *gin.Context) {
 
 	maxAge := -1 * int(time.Hour*24/time.Second)
 
-
-	c.SetCookie("jwt", "", maxAge, "/", configs.Env.APP_URL, configs.Env.MODE == "production" , true)
+	c.SetCookie("jwt", "", maxAge, "/", configs.Env.APP_URL, configs.Env.MODE == "production", true)
 
 	helpers.SendJSON(c, http.StatusOK, gin.H{
 		"message": "Logged out successfully",

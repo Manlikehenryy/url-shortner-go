@@ -14,6 +14,8 @@ type Url struct {
 	ClickCount   int                `bson:"clickCount"`
 	ClickDetails []Click            `bson:"clickDetails"`
 	UserId       primitive.ObjectID `json:"userId" bson:"userId"`
+	CreatedAt    time.Time          `json:"createdAt" bson:"createdAt"`
+	UpdatedAt    time.Time          `json:"updatedAt" bson:"updatedAt"`
 }
 
 type Click struct {

@@ -10,6 +10,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/manlikehenryy/url-shortener-go/models"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -130,8 +131,12 @@ func PaginateCollection(
 	cursor, err := collection.Find(
 		context.Background(),
 		filter,
-		options.Find().SetSkip(int64(offset)).SetLimit(int64(limit)),
+		options.Find().
+			SetSkip(int64(offset)).
+			SetLimit(int64(limit)).
+			SetSort(bson.D{{Key: "createdAt", Value: -1}}),  // Sort by createdAt in descending order
 	)
+
 	if err != nil {
 		log.Println("Error finding documents:", err)
 		return nil, err

@@ -9,6 +9,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis/v8"
+	"github.com/manlikehenryy/url-shortener-go/configs"
 	"github.com/manlikehenryy/url-shortener-go/database"
 	"github.com/manlikehenryy/url-shortener-go/helpers"
 	"github.com/manlikehenryy/url-shortener-go/models"
@@ -47,6 +48,9 @@ func CreateUrl(c *gin.Context) {
 	}
 
 	url.ShortUrl = shortURL
+	url.ClickDetails = []models.Click{}
+	url.CreatedAt = time.Now()
+	url.UpdatedAt = time.Now() 
 
 	insertResult, err := urlCollection.InsertOne(context.Background(), url)
 	if err != nil {
@@ -56,14 +60,13 @@ func CreateUrl(c *gin.Context) {
 	}
 
 	url.ID = insertResult.InsertedID.(primitive.ObjectID)
-	url.ShortUrl = fmt.Sprintf("http://localhost:5000/%s", shortURL)
+	url.ShortUrl = fmt.Sprintf("%s/%s", configs.Env.APP_URL, shortURL)
 
 	helpers.SendJSON(c, http.StatusCreated, gin.H{
 		"data":    url,
 		"message": "Url created successfully",
 	})
 }
-
 
 func RedirectURL(c *gin.Context) {
 	shortURL := c.Param("shortURL")
@@ -78,18 +81,18 @@ func RedirectURL(c *gin.Context) {
 		return
 	}
 
-	  // Update click count and append user details
-	  url, err := urlCollection.UpdateOne(
-        context.TODO(),
-        bson.M{"shortUrl": shortURL},
-        bson.M{
-            "$inc": bson.M{"clickCount": 1},
-            "$push": bson.M{"clickDetails": bson.M{
-                "ipAddress": c.ClientIP(),
-                "timestamp":  time.Now(),
-            }},
-        },
-    )
+	// Update click count and append user details
+	url, err := urlCollection.UpdateOne(
+		context.TODO(),
+		bson.M{"shortUrl": shortURL},
+		bson.M{
+			"$inc": bson.M{"clickCount": 1},
+			"$push": bson.M{"clickDetails": bson.M{
+				"ipAddress": helpers.GetClientIP(c),
+				"timestamp": time.Now(),
+			}},
+		},
+	)
 
 	if err != nil {
 		log.Println("Database error:", err)
@@ -103,18 +106,6 @@ func RedirectURL(c *gin.Context) {
 	c.Redirect(http.StatusFound, originalURL)
 }
 
-func GetAllUrl(c *gin.Context) {
-	var urls []models.Url
-	filter := bson.M{}
-
-	params, err := helpers.PaginateCollection(c, urlCollection, filter, &urls)
-	if err != nil {
-		helpers.SendError(c, http.StatusInternalServerError, "Failed to retrieve urls")
-		return
-	}
-
-	helpers.SendPaginatedResponse(c, urls, params)
-}
 
 func GetUrl(c *gin.Context) {
 
@@ -184,10 +175,19 @@ func UpdateUrl(c *gin.Context) {
 		return
 	}
 
+	expiration := time.Duration(url.Expiration) * time.Second
+	err = database.RDB.Set(ctx, existingUrl.ShortUrl, url.OriginalUrl, expiration).Err()
+	if err != nil {
+		log.Println(err)
+		helpers.SendError(c, http.StatusInternalServerError, "Failed to update URL")
+		return
+	}
+
 	update := bson.M{
 		"$set": bson.M{
 			"originalUrl": url.OriginalUrl,
 			"expiration":  url.Expiration,
+			"updatedAt": time.Now(),
 		},
 	}
 
@@ -208,7 +208,7 @@ func UpdateUrl(c *gin.Context) {
 	})
 }
 
-func UsersUrl(c *gin.Context) {
+func GetAllUrl(c *gin.Context) {
 	userId, ok := c.MustGet("userId").(primitive.ObjectID)
 	if !ok {
 		helpers.SendError(c, http.StatusUnauthorized, "User ID not found in context")
@@ -267,6 +267,12 @@ func DeleteUrl(c *gin.Context) {
 
 	if result.DeletedCount == 0 {
 		helpers.SendError(c, http.StatusNotFound, "Url not found or unauthorized")
+		return
+	}
+
+	err = database.RDB.Del(ctx, existingUrl.ShortUrl).Err()
+	if err != nil {
+		helpers.SendError(c, http.StatusInternalServerError, "Failed to delete URL")
 		return
 	}
 

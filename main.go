@@ -7,6 +7,8 @@ import (
 	"github.com/go-redis/redis/v8"
 	"github.com/manlikehenryy/url-shortener-go/configs"
 	"github.com/manlikehenryy/url-shortener-go/database"
+	"github.com/manlikehenryy/url-shortener-go/routes"
+
 	"github.com/manlikehenryy/url-shortener-go/helpers"
 )
 
@@ -25,8 +27,6 @@ func main() {
 	
 
 
-	// Initialize configuration
-	configs.Init()
 	helpers.Initialize()
 
 	// Connect to the database
@@ -46,7 +46,7 @@ func main() {
 	app.Use(gin.Recovery())
 
 	// Set up routes
-	// routes.Setup(app)
+	routes.Setup(app)
 
 	// Start the server
 	err := app.Run(":" + port)
