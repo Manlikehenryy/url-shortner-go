@@ -1,7 +1,7 @@
 package main
 
 import (
-	"crypto/tls"
+
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis/v8"
@@ -13,15 +13,6 @@ import (
 )
 
 var rdb *redis.Client
-
-func nit() {
-	rdb = redis.NewClient(&redis.Options{
-		Addr:      configs.Env.REDIS_ADDRESS,  // Redis address (without rediss://)
-		Username:  configs.Env.REDIS_USERNAME, // Username for Redis instance
-		Password:  configs.Env.REDIS_PASSWORD, // Password for Redis instance
-		TLSConfig: &tls.Config{},              // Enables SSL/TLS
-	})
-}
 
 func main() {
 	

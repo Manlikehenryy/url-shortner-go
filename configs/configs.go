@@ -24,9 +24,12 @@ func init() {
 
 	Env = &Config{}
 
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatalf("Error loading .env file: %v", err)
+	if os.Getenv("MODE") != "production" {
+		err := godotenv.Load()
+		if err != nil {
+			log.Fatalf("Error loading .env file: %v", err)
+		}
+
 	}
 
 	Env.PORT = os.Getenv("PORT")
