@@ -126,7 +126,7 @@ func Login(c *gin.Context) {
 	}
 
 	maxAge := int(time.Hour * 24 / time.Second)
-	c.SetCookie("jwt", token, maxAge, "/", "localhost", false, true)
+	c.SetCookie("jwt", token, maxAge, "/", configs.Env.APP_URL, configs.Env.MODE == "production", true)
 
 	helpers.SendJSON(c, http.StatusOK, gin.H{
 		"data":    user,
