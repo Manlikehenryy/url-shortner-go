@@ -19,13 +19,19 @@ var RDB *redis.Client
 // Initialize Redis
 
 func init() {
-	
-	RDB = redis.NewClient(&redis.Options{
-		Addr:      configs.Env.REDIS_ADDRESS,  // Redis address (without rediss://)
-		Username:  configs.Env.REDIS_USERNAME, // Username for Redis instance
-		Password:  configs.Env.REDIS_PASSWORD, // Password for Redis instance
-		TLSConfig: &tls.Config{},              // Enables SSL/TLS
-	})
+	if configs.Env.MODE == "production" {
+		RDB = redis.NewClient(&redis.Options{
+			Addr: configs.Env.REDIS_ADDRESS, // Redis address (without rediss://)
+		})
+	} else {
+		RDB = redis.NewClient(&redis.Options{
+			Addr:      configs.Env.REDIS_ADDRESS,  // Redis address (without rediss://)
+			Username:  configs.Env.REDIS_USERNAME, // Username for Redis instance
+			Password:  configs.Env.REDIS_PASSWORD, // Password for Redis instance
+			TLSConfig: &tls.Config{},              // Enables SSL/TLS
+		})
+	}
+
 }
 
 // Initialize the MongoDB client
