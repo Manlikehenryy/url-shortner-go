@@ -3,6 +3,7 @@ package middleware
 import (
 	"context"
 	"fmt"
+	"log"
 	"net/http"
 	"time"
 
@@ -16,6 +17,7 @@ var ctx = context.Background()
 
 func RateLimit(c *gin.Context) {
 	ip := helpers.GetClientIP(c)
+	log.Println("ipAddress: "+ip)
 
 	limit := 2 // 10 clicks per minute
 	key := fmt.Sprintf("rate_limit:%s", ip)
