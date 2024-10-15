@@ -40,7 +40,7 @@ git clone [https://github.com/manlikehenryy/url-shortener-go.git](https://github
     "phone": "",
     "email": "",
     "password": ""
-}
+    }
 
 ### Response
 
@@ -59,7 +59,7 @@ git clone [https://github.com/manlikehenryy/url-shortener-go.git](https://github
         "updatedAt": "2024-10-15T21:13:04.3139111+01:00"
     },
     "message": "Account created successfully"
-}
+    }
 
 ## Login
 
@@ -92,7 +92,7 @@ git clone [https://github.com/manlikehenryy/url-shortener-go.git](https://github
         "updatedAt": "2024-10-15T20:13:04.313Z"
     },
     "message": "Logged in successfully"
-}
+    }
 
 ## Shorten a url
 
@@ -107,7 +107,7 @@ git clone [https://github.com/manlikehenryy/url-shortener-go.git](https://github
     {
     "originalUrl": "https://longurl/jdjdjeuuuednffms/sjsjsjsjsjsjnnsnssssshh/msmsmsmssmsmsmsmmsmmsmsm",
     "expiration": 240  // 0 for no expiration
-}
+    }
 
 ### Response
 
@@ -129,7 +129,7 @@ git clone [https://github.com/manlikehenryy/url-shortener-go.git](https://github
         "updatedAt": "2024-10-15T21:20:43.2041692+01:00"
     },
     "message": "Url created successfully"
-}
+    }
 
 ## List all url
 
@@ -172,7 +172,7 @@ git clone [https://github.com/manlikehenryy/url-shortener-go.git](https://github
         "perPage": 10,
         "total": 1
     }
-}
+    }
 
 ## Update a url
 
@@ -187,7 +187,7 @@ git clone [https://github.com/manlikehenryy/url-shortener-go.git](https://github
     {
     "originalUrl": "https://longurl/jdjdjeuuuednffms/sjsjsjsjsjsjnnsnssssshh/msmsmsmssmsmsmsmmsmmsmsm",
     "expiration": 300  // 0 for no expiration
-}
+    }
 
 ### Response
 
@@ -198,7 +198,7 @@ git clone [https://github.com/manlikehenryy/url-shortener-go.git](https://github
 
    {
     "message": "Url updated successfully"
-}
+   }
 
 ## Delete a url
 
@@ -219,4 +219,4 @@ git clone [https://github.com/manlikehenryy/url-shortener-go.git](https://github
 
    {
     "message": "Url deleted successfully"
-}
+   }
