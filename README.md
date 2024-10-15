@@ -1,6 +1,6 @@
 # Url Shortener
 
-A URL shortening REST API built with Golang, Gin, MongoDB, and Redis. It uses JWT for authentication, with tokens securely stored in cookies. Key features include rate limiting, link expiration, and click tracking.
+A URL shortening REST API built with Golang, Gin, MongoDB, and Redis. It uses JWT for authentication, with tokens securely stored in cookies. Key features include rate limiting, link expiration, and click tracking
 
 https://url-shortener-go-u8dq.onrender.com/api
 
