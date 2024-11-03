@@ -8,7 +8,7 @@ https://url-shortener-go-u8dq.onrender.com/api
 
 git clone [https://github.com/manlikehenryy/url-shortener-go.git](https://github.com/manlikehenryy/url-shortener-go.git)
 
-## After cloning navigating to the directory
+## After cloning, navigate to the root directory
 
 ## Create a .env file, copy the content of example.env to the .env file
 
